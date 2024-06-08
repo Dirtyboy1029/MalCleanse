@@ -14,7 +14,7 @@ scikit-learn==0.23.0
 pandas>=1.0.4
 androguard==3.3.5
 absl-py==0.8.1
-# python-magic-bin==0.4.14
+python-magic-bin==0.4.14
 seaborn
 Pillow
 pyelftools
