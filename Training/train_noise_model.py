@@ -27,8 +27,6 @@ def main_deepdrebin(model_type, data_type, noise_type, noise_hyper, EPOCH=100):
         model_architecture = MCDropout
     elif model_type == 'deepensemble':
         model_architecture = DeepEnsemble
-    elif model_type == 'wdeepensemble':
-        model_architecture = WeightedDeepEnsemble
     else:
         model_architecture = None
     output_path = '/home/lhd/Label_denoise_via_uncertainty/Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
@@ -117,9 +115,6 @@ if __name__ == '__main__':
     noise_type = args.noise_type
     noise_hyper = args.noise_hyper
 
-    for data_type in ["malradar", ]:
-        for model_type in ['deepensemble' ]:  #'deepensemble'
-            for noise_type in ['Microsoft']:  # ['AVG', 'F-Secure', 'Ikarus', 'Sophos', 'Kaspersky','Alibaba','ZoneAlarm']
-                for noise_hyper in [0]:
-                    main_deepdrebin(model_type=model_type, data_type=data_type, noise_type=noise_type,
+    
+    main_deepdrebin(model_type=model_type, data_type=data_type, noise_type=noise_type,
                                     noise_hyper=noise_hyper, EPOCH=100)
