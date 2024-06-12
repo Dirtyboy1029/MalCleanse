@@ -24,7 +24,8 @@ We develop the codes on Windows operation system, and run the codes on Ubuntu 20
      multiprocessing-logging
 
 ##  Usage
-#### 1. Estimate uncertainty
+#### 1. Estimate uncertainty：We use Variational Bayesian Inference (VBI) to perform 5-fold cross-validation on the dataset with label noise to evaluate the uncertainty of each sample. Specifically, we generate 10 prediction probabilities for each sample. The differences among these 10 prediction probabilities represent the uncertainty for that sample.
+
      cd Training 
 
      python train_noise_model.py 
