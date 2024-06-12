@@ -16,7 +16,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-train_data_type', '-dt', type=str, default="malradar")
     parser.add_argument('-noise_type', '-nt', type=str,
-                        default='Sophos')  # ['AVG', 'F-Secure', 'Ikarus', 'Sophos', 'Kaspersky','Alibaba','ZoneAlarm']
+                        default='Sophos')  # ['F-Secure', 'Ikarus', 'Sophos', 'Alibaba','ZoneAlarm']
     parser.add_argument('-noise_hyper', '-nh', type=int, default=0)
     args = parser.parse_args()
     data_type = args.train_data_type
