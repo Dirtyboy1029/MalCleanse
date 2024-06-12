@@ -4,7 +4,7 @@
 This repository is associated with our paper titled **Tackling Real-World Out-of-Distribution Label Noise in Android Malware Datasets**.
 In this paper, we first explore the characteristics of label noise in real-world Android malware datasets, which we refer to as OOD (Out-Of-Distribution) label noise. Then, we design this tool to remove OOD label noise. We start by assessing the model's uncertainty regarding the samples in the dataset, and based on these uncertainties, we use anomaly detection algorithms to eliminate this label noise.
 
-## List your prerequisites:
+## Prerequisites:
 We develop the codes on Windows operation system, and run the codes on Ubuntu 20.04. The codes depend on Python 3.8.10. Other packages (e.g., TensorFlow):
 #### 
      tensorflow==2.9.1
@@ -31,7 +31,8 @@ We develop the codes on Windows operation system, and run the codes on Ubuntu 20
      python train_noise_model.py 
 
 
-#### 2. Label Noise detection
+#### 2. Label Noise detection：We calculate the average cross-entropy of these 10 prediction probabilities and use it as a quantification metric for uncertainty. Then, using anomaly detection algorithms, the anomalous samples are identified as label noise samples.
+
      cd myexperiments
 
      python my_tool.py 
