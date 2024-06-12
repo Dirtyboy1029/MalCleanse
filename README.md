@@ -5,7 +5,7 @@ This repository is associated with our paper titled **Tackling Real-World Out-of
 In this paper, we first explore the characteristics of label noise in real-world Android malware datasets, which we refer to as OOD (Out-Of-Distribution) label noise. Then, we design this tool to remove OOD label noise. We start by assessing the model's uncertainty regarding the samples in the dataset, and based on these uncertainties, we use anomaly detection algorithms to eliminate this label noise.
 
 ## Prerequisites:
-We develop the codes on Windows operation system, and run the codes on Ubuntu 20.04. The codes depend on Python 3.8.10. Other packages (e.g., TensorFlow):
+The codes depend on Python 3.8.10. Before using the tool, some dependencies need to be installed. The list is as follows:
 #### 
      tensorflow==2.9.1
      tensorflow-probability==0.17.0
