@@ -29,58 +29,58 @@ if __name__ == '__main__':
     if not os.path.isdir('my_tool_difference/one_class_svm/'):
         os.makedirs('my_tool_difference/one_class_svm/')
 
-    for noise_type in ['Microsoft', ]:
-        print('-----------------------------------------------------------------------------------')
-        print(
-            '-------------' + data_type + '     ' + noise_type + '--------------------------')
-        print('-----------------------------------------------------------------------------------')
-        data_filenames, gt_labels, noise_labels, bayesian_prob = data_process_for_bayesian(
-            data_type,
-            noise_type,
-            noise_hyper)
-        print('Source benign noise number is ',
-              len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0]))
-        print('Source benign noise ratio is {:.5f}%'.format(
-            ((len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0])) / len(
-                np.where(noise_labels == 0)[0])) * 100))
+   
+    print('-----------------------------------------------------------------------------------')
+    print(
+        '-------------' + data_type + '     ' + noise_type + '--------------------------')
+    print('-----------------------------------------------------------------------------------')
+    data_filenames, gt_labels, noise_labels, bayesian_prob = data_process_for_bayesian(
+        data_type,
+        noise_type,
+        noise_hyper)
+    print('Source benign noise number is ',
+          len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0]))
+    print('Source benign noise ratio is {:.5f}%'.format(
+        ((len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0])) / len(
+            np.where(noise_labels == 0)[0])) * 100))
 
-        noise_benign_index = np.where(noise_labels == 0)[0]
-        noise_malware_index = np.where(noise_labels == 1)[0]
+    noise_benign_index = np.where(noise_labels == 0)[0]
+    noise_malware_index = np.where(noise_labels == 1)[0]
 
-        data = []
-        for epoch in range(20):
-            bay_prob = bayesian_prob[epoch]
-            uc_entropy = np.array([predictive_entropy(prob_) for prob_ in bay_prob])
-            uc_mean = np.array([np.mean(prob_) for prob_ in bay_prob])
-            data.append(uc_entropy[noise_benign_index])
-            data.append(uc_mean[noise_benign_index])
-        data = np.array(data).T
-        bay_prob = np.mean(bayesian_prob[19], axis=1)
-        confident_joint = get_confident_joint_index(noise_labels, bay_prob)
-        print(len(confident_joint[0]), len(confident_joint[2]))
-        eva_noise_ratio = len(confident_joint[2]) / (len(confident_joint[2]) + len(confident_joint[0]))
-        eva_noise_num = int(len(np.where(noise_labels == 0)[0]) * eva_noise_ratio)
-        print('evalaute noise ratio is {:.5f}%'.format(eva_noise_ratio * 100))
-        print('evalaute noise number is ', eva_noise_num)
+    data = []
+    for epoch in range(20):
+        bay_prob = bayesian_prob[epoch]
+        uc_entropy = np.array([predictive_entropy(prob_) for prob_ in bay_prob])
+        uc_mean = np.array([np.mean(prob_) for prob_ in bay_prob])
+        data.append(uc_entropy[noise_benign_index])
+        data.append(uc_mean[noise_benign_index])
+    data = np.array(data).T
+    bay_prob = np.mean(bayesian_prob[19], axis=1)
+    confident_joint = get_confident_joint_index(noise_labels, bay_prob)
+    print(len(confident_joint[0]), len(confident_joint[2]))
+    eva_noise_ratio = len(confident_joint[2]) / (len(confident_joint[2]) + len(confident_joint[0]))
+    eva_noise_num = int(len(np.where(noise_labels == 0)[0]) * eva_noise_ratio)
+    print('evalaute noise ratio is {:.5f}%'.format(eva_noise_ratio * 100))
+    print('evalaute noise number is ', eva_noise_num)
 
-        X_diff_feature = []
-        for item in data:
-            X_diff_feature.append(item)
-        X_diff_feature = np.array(X_diff_feature)
+    X_diff_feature = []
+    for item in data:
+        X_diff_feature.append(item)
+    X_diff_feature = np.array(X_diff_feature)
 
-        # isolation_forest = IsolationForest(n_estimators=100,
-        #                                    contamination=eva_noise_ratio)
-        # isolation_forest.fit(X_diff_feature)
-        # outliers_isolation_forest = isolation_forest.predict(X_diff_feature)
-        # np.save('my_tool_difference/isolation_forest/' + data_type + '_' + noise_type, outliers_isolation_forest)
+    isolation_forest = IsolationForest(n_estimators=100,
+                                       contamination=eva_noise_ratio)
+    isolation_forest.fit(X_diff_feature)
+    outliers_isolation_forest = isolation_forest.predict(X_diff_feature)
+    np.save('my_tool_difference/isolation_forest/' + data_type + '_' + noise_type, outliers_isolation_forest)
 
-        # dbscan = DBSCAN(eps=0.387,
-        #                 min_samples=eva_noise_num)  # len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0])
-        # dbscan.fit(X_diff_feature)
-        # outliers_dbscan = dbscan.labels_
-        # np.save('my_tool_difference/dbscan/' + data_type + '_' + noise_type, outliers_dbscan)
+    dbscan = DBSCAN(eps=0.1,
+                    min_samples=eva_noise_num)  # len(np.where(noise_labels == 0)[0]) - len(np.where(gt_labels == 0)[0])
+    dbscan.fit(X_diff_feature)
+    outliers_dbscan = dbscan.labels_
+    np.save('my_tool_difference/dbscan/' + data_type + '_' + noise_type, outliers_dbscan)
 
-        clf = OneClassSVM(kernel='rbf', nu=eva_noise_ratio)
-        clf.fit(X_diff_feature)
-        outliers_svm = clf.predict(X_diff_feature)
-        np.save('my_tool_difference/one_class_svm/' + data_type + '_' + noise_type, outliers_svm)
+    clf = OneClassSVM(kernel='rbf', nu=eva_noise_ratio)
+    clf.fit(X_diff_feature)
+    outliers_svm = clf.predict(X_diff_feature)
+    np.save('my_tool_difference/one_class_svm/' + data_type + '_' + noise_type, outliers_svm)
