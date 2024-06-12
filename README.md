@@ -2,7 +2,6 @@
 
 
 This repository is associated with our paper titled **Tackling Real-World Out-of-Distribution Label Noise in Android Malware Datasets**.
- 
 In this paper, we first explore the characteristics of label noise in real-world Android malware datasets, which we refer to as OOD (Out-Of-Distribution) label noise. Then, we design this tool to remove OOD label noise. We start by assessing the model's uncertainty regarding the samples in the dataset, and based on these uncertainties, we use anomaly detection algorithms to eliminate this label noise.
 
 ## Dependencies:
