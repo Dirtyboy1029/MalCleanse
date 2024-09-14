@@ -20,11 +20,16 @@ bayesian_ensemble_hparam = _BAYESIAN_HP_TEMPLATE(n_sampling=10)
 _DNN_HP_TEMPLATE = namedtuple('DNN',
                               ['hidden_units', 'dropout_rate', 'activation', 'output_dim'])
 
-dnn_hparam = _DNN_HP_TEMPLATE(hidden_units=[200, 200],
+dnn_hparam = _DNN_HP_TEMPLATE(hidden_units=[200,200],
                               # DNN has two hidden layers with each having 200 neurons
                               dropout_rate=0.4,
                               activation='relu',
                               output_dim=1  # binary classification#
                               )
+
+_DROIDETEC_HP_TEMPLATE = namedtuple('droidetec',
+                                    ['vocab_size', 'n_embedding_dim', 'lstm_units', 'hidden_units',
+                                     'dropout_rate', 'max_sequence_length', 'output_dim'])
+
 
 

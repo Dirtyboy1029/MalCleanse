@@ -57,9 +57,8 @@ def _dnn_graph(input_dim=None, use_mc_dropout=False):
 
 
 model_name_type_dict = {
-    'dnn': _dnn_graph,
+    'dnn': _dnn_graph
 }
-
 
 def build_models(input_x, architecture_type, ensemble_type='vanilla', input_dim=None, use_mc_dropout=False):
     builder = model_builder(architecture_type)

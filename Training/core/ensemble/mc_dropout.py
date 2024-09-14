@@ -135,7 +135,7 @@ class MCDropout(Vanilla):
                 epoch + 1, EPOCH, train_acc, val_acc
             )
             logger.info(msg)
-            if test_data is not None and training_predict is True and (epoch + 1) % 5 == 0:
+            if test_data is not None and training_predict is True: # and (epoch + 1) % 5 == 0
                 prob.append(self.predict_in_training(test_data, use_prob=False))
 
             # if epoch >= 20 and val_acc > best_val_accuracy:

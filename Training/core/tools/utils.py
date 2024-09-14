@@ -507,18 +507,11 @@ def customized_reparameterization_dense_layer(scale_factor=1. / 10000):
                                                             reinterpreted_batch_ndims=1))),
         ])
 
-    def _trainable_prior_fn(kernel_size, bias_size=0, dtype=None):
-        return tf.keras.Sequential([
-            tfp.layers.VariableLayer(kernel_size + bias_size, dtype=dtype),
-            tfp.layers.DistributionLambda(
-                lambda mu: tfd.Independent(tfd.Normal(loc=mu, scale=1),
-                                           reinterpreted_batch_ndims=1)),
-        ])
 
     return functools.partial(
         tfp.layers.DenseVariational,
         make_posterior_fn=_posterior_mean_field,
-        make_prior_fn=_mixture_prior_fn_(),
+        make_prior_fn=_non_trainable_prior_fn,
         kl_weight=scale_factor)
 
 

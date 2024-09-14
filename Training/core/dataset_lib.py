@@ -17,3 +17,23 @@ def build_dataset_from_numerical_data(data, batch_size=None):
         prefetch(tf.data.experimental.AUTOTUNE)
 
 
+def build_dataset_via_generator(generator, y=None, path='', batch_size=8):
+    if y is not None:
+        return tf.data.Dataset.from_generator(generator,
+                                              output_types=(tf.int32, tf.int32),
+                                              output_shapes=(tf.TensorShape([None]), tf.TensorShape([]))
+                                              ). \
+            padded_batch(batch_size, padded_shapes=([None], [])). \
+            cache(path). \
+            shuffle(buffer_size=100). \
+            prefetch(tf.data.experimental.AUTOTUNE)
+    else:
+        return tf.data.Dataset.from_generator(generator,
+                                              output_types=tf.int32,
+                                              output_shapes=tf.TensorShape([None])
+                                              ). \
+            padded_batch(batch_size, padded_shapes=([None])). \
+            cache(path). \
+            prefetch(tf.data.experimental.AUTOTUNE)
+
+

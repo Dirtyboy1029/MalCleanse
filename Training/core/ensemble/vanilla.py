@@ -213,10 +213,10 @@ class Vanilla(Ensemble):
                 epoch + 1, EPOCH, train_acc, val_acc
             )
             logger.info(msg)
-            if test_data is not None and training_predict is True and (epoch + 1) % 5 == 0:
+            if test_data is not None and training_predict is True: # and (epoch + 1) % 5 == 0
                 prob.append(self.predict_in_training(test_data, use_prob=False))
 
-
+        self.save_ensemble_weights()
         training_log = [train_acc_list, train_loss_list, val_acc_list, val_loss_list]
         return prob, training_log
 

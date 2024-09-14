@@ -17,54 +17,33 @@ def get_confident_joint_index(noise_labels, prob):
     return [noise_0_pred_0, noise_0_pred_1, noise_1_pred_0, noise_1_pred_1]
 
 
-def data_process(data_type, noise_type, noise_hyper):
-    save_path = '../Training/config/' + data_type + '_database_' + noise_type + '_' + str(
-        noise_hyper) + '.drebin'
+def data_process(noise_type, model_type='vanilla'):
+    save_path = '../Training/config/' + 'databases_' + str(noise_type) + '.conf'
     data_filenames, gt_labels, noise_labels = read_joblib(save_path)
     gt_labels = np.array(gt_labels)
     noise_labels = np.array(noise_labels)
     samples_num = len(data_filenames)
     data = np.load(
-        '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-            noise_hyper) + '/bayesian/prob/fold1.npy')
+        '../Training/output/' + noise_type + '/' + model_type + '/prob/fold1.npy')
     epoch_num = data.shape[0]
-    vanilla_prob = np.zeros((epoch_num, samples_num))
-    mcdropout_prob = np.zeros((epoch_num, samples_num, 10))
-    bayesian_prob = np.zeros((epoch_num, samples_num, 10))
-    deep_prob = np.zeros((epoch_num, samples_num, 10))
+    if model_type == 'vanilla':
+        vanilla_prob = np.zeros((epoch_num, samples_num))
+    else:
+        vanilla_prob = np.zeros((epoch_num, samples_num, 10))
     for i in range(epoch_num):
-        vanilla_ = np.zeros(samples_num)
-        mcdropout_ = np.zeros((samples_num, 10))
-        bayesian_ = np.zeros((samples_num, 10))
-        deep_ = np.zeros((samples_num, 10))
+        if model_type == 'vanilla':
+            vanilla_ = np.zeros(samples_num)
+        else:
+            vanilla_ = np.zeros((samples_num, 10))
         for fold in range(5):
             index = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/index/fold' + str(fold + 1) + '.npy', allow_pickle=True)[1]
+                '../Training/output/' + noise_type + '/index/fold' + str(fold + 1) + '.npy', allow_pickle=True)[1]
             vanilla_data = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/vanilla/prob/fold' + str(fold + 1) + '.npy')[i]
-            mcdropout_data = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/mcdropout/prob/fold' + str(fold + 1) + '.npy')[i]
-            bayes_data = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/bayesian/prob/fold' + str(fold + 1) + '.npy')[i]
-            deep_data = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/deepensemble/prob/fold' + str(fold + 1) + '.npy')[i]
-
+                '../Training/output/' + noise_type + '/' + model_type + '/prob/fold' + str(fold + 1) + '.npy')[i]
             vanilla_[index] = np.squeeze(vanilla_data)
-            bayesian_[index] = np.squeeze(bayes_data)
-            mcdropout_[index] = np.squeeze(mcdropout_data)
-            deep_[index] = np.squeeze(deep_data)
 
         vanilla_prob[i] = vanilla_
-        mcdropout_prob[i] = mcdropout_
-        bayesian_prob[i] = bayesian_
-        deep_prob[i] = deep_
-
-    return data_filenames, gt_labels, noise_labels, vanilla_prob, mcdropout_prob, bayesian_prob, deep_prob
+    return data_filenames, gt_labels, noise_labels, vanilla_prob
 
 
 def nll(p, label, eps=1e-10, base=2):
@@ -145,12 +124,10 @@ def read_joblib(path):
         raise IOError("The {0} is not a file.".format(path))
 
 
-def evaluate_dataset_noise(data_type, noise_type, noise_hyper, data_filenames, gt_labels, noise_labels):
+def evaluate_dataset_noise(noise_type, data_filenames, gt_labels, noise_labels):
     from sklearn.metrics import accuracy_score
     print('***************************************************************************')
-    print('***********************Malware from ' + data_type + '**************************')
     print('***********************Noise type ' + noise_type + '**************************')
-    print('***********************Noise hyper ' + str(noise_hyper) + '**************************')
     print('***************************************************************************')
     print('Contain samples ' + str(len(data_filenames)))
     print('Noise benign', len(np.where(noise_labels == 0)[0]))
@@ -191,31 +168,3 @@ def evaluate_cleanlab(gt_labels, noise_labels, ordered_label_errors, clean_malwa
             else:
                 denoise_label.append(noise_labels[i])
     return round(accuracy_score(gt_labels, denoise_label), 6)
-
-
-def data_process_for_bayesian(data_type, noise_type, noise_hyper):
-    save_path = '../Training/config/' + data_type + '_database_' + noise_type + '_' + str(
-        noise_hyper) + '.drebin'
-    data_filenames, gt_labels, noise_labels = read_joblib(save_path)
-    gt_labels = np.array(gt_labels)
-    noise_labels = np.array(noise_labels)
-    samples_num = len(data_filenames)
-    data = np.load(
-        '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-            noise_hyper) + '/bayesian/prob/fold1.npy')
-    epoch_num = data.shape[0]
-    bayesian_prob = np.zeros((epoch_num, samples_num, 10))
-    for i in range(epoch_num):
-        bayesian_ = np.zeros((samples_num, 10))
-        for fold in range(5):
-            index = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/index/fold' + str(fold + 1) + '.npy', allow_pickle=True)[1]
-            bayes_data = np.load(
-                '../Training/output/' + data_type + '/drebin/' + noise_type + '_' + str(
-                    noise_hyper) + '/bayesian/prob/fold' + str(fold + 1) + '.npy')[i]
-            bayesian_[index] = np.squeeze(bayes_data)
-        bayesian_prob[i] = bayesian_
-
-
-    return data_filenames, gt_labels, noise_labels, bayesian_prob

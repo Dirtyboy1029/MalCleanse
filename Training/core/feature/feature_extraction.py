@@ -54,7 +54,7 @@ class FeatureExtraction(object):
         """
         raise NotImplementedError
 
-    def feature_preprocess(self, feature_path_list, gt_labels, data_type, noise_type, noise_hyper):
+    def feature_preprocess(self, feature_path_list, gt_labels, noise_type):
         """
         pre-processing the naive data to accommodate the input format of ML algorithms
         :param feature_path_list: feature paths produced by the method of feature_extraction
@@ -62,7 +62,7 @@ class FeatureExtraction(object):
         """
         raise NotImplementedError
 
-    def feature2ipt(self, feature_path_list, labels=None, is_training_set=False, noise_type='random', noise_hyper=20):
+    def feature2ipt(self, feature_path_list, labels=None, is_training_set=False, noise_type='random'):
         """
         Mapping features to the input space
 
@@ -168,15 +168,14 @@ class DrebinFeature(FeatureExtraction):
                 print(str(res))
         return feature_list
 
-    def feature_preprocess(self, feature_path_list, gt_labels, data_type, noise_type, noise_hyper):
+    def feature_preprocess(self, feature_path_list, gt_labels, noise_type):
         """
         pre-processing the naive data to accommodate the input format of ML algorithms
         :param feature_path_list: feature paths produced by the method of feature_extraction
         :param gt_labels: corresponding ground truth labels
 
         """
-        vocab_path = os.path.join(self.meta_data_save_dir,
-                                  data_type + '_drebin_' + noise_type + '_' + str(noise_hyper) + '.vocab')
+        vocab_path = os.path.join(self.meta_data_save_dir, noise_type + '.vocab')
         if self.update or (not os.path.exists(vocab_path)):
             assert len(feature_path_list) == len(gt_labels)
             features = self.load_features(feature_path_list)
@@ -187,8 +186,8 @@ class DrebinFeature(FeatureExtraction):
             print('save vocab to ' + vocab_path)
         return
 
-    def feature2ipt(self, feature_path_list, labels=None, data_type='drebin', is_training_set=False,
-                    noise_type='random', noise_hyper=20):
+    def feature2ipt(self, feature_path_list, labels=None,  is_training_set=False,
+                    noise_type='random'):
         """
         Mapping features to the input space
         :param feature_path_list: the feature paths produced by the method of feature_extraction
@@ -198,18 +197,17 @@ class DrebinFeature(FeatureExtraction):
         :rtype tf.data.Dataset object; integer
         """
         # load
-        vocab_path = os.path.join(self.meta_data_save_dir,
-                                  data_type + '_drebin_' + noise_type + '_' + str(noise_hyper) + '.vocab')
+        vocab_path = os.path.join(self.meta_data_save_dir, noise_type + '.vocab')
 
         if not os.path.exists(vocab_path):
             if labels is not None:
-                self.feature_preprocess(feature_path_list, labels, data_type=data_type, noise_type=noise_type,
-                                        noise_hyper=noise_hyper)
+                self.feature_preprocess(feature_path_list, labels, noise_type=noise_type)
             else:
                 raise ValueError('Need ground truth label!')
         vocab = utils.read_pickle(vocab_path)
         print('read vocab from ' + vocab_path)
         dim = len(vocab)
+        print(dim)
         features = self.load_features(feature_path_list)
         dataX_np = self.get_feature_representation(features, vocab)
         if labels is not None:

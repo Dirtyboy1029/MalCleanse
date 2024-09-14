@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 # @Time : 2024/5/7 15:30 
 # @Author : DirtyBoy 
-# @File : demo1.py
+# @File : samples_diff_plot.py
 import numpy as np
 from utils import data_process, evaluate_dataset_noise, prob2psx, evaluate_cleanlab
 from sklearn.metrics import accuracy_score
@@ -10,60 +10,75 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-train_data_type', '-dt', type=str, default="malradar")
-    parser.add_argument('-noise_type', '-nt', type=str, default='Microsoft') ##['AVG', 'F-Secure', 'Ikarus', 'Sophos', 'Kaspersky','Alibaba','ZoneAlarm']
-    parser.add_argument('-noise_hyper', '-nh', type=int, default=0)
+    parser.add_argument('-noise_type', '-nt', type=str, default='thr_18')
+    parser.add_argument('-model_type', '-mt', type=str, nargs='+',
+                        default=['bayesian'])
+    parser.add_argument('-i', type=int,
+                        default=4)
     args = parser.parse_args()
-    data_type = args.train_data_type
-    noise_type = args.noise_type
-    noise_hyper = args.noise_hyper
+    iii = args.i
+    Noise_type = args.noise_type
+    model_type_set = args.model_type
+    all = []
 
-    data_filenames, gt_labels, noise_labels, vanilla_prob, mcdropout_prob, bayesian_prob, deep_prob = data_process(
-        data_type,
-        noise_type,
-        noise_hyper)
-    evaluate_dataset_noise(data_type, noise_type, noise_hyper, data_filenames, gt_labels, noise_labels)
-    print('******' + 'Cross-validation for ' + str(
-        vanilla_prob.shape[0] * 5) + ' epochs, evaluating every 5 epochs.' + '*******')
+    for j in range(1, iii):
+        Tmp = []
+        if 'random' in Noise_type:
+            a, b = Noise_type.split('_', 1)
+        else:
+            a, b = Noise_type.rsplit('_', 1)
+        noise_type = a + '_' + str(j) + '_' + b
+        prob_set = []
+        for model_type in model_type_set:
+            data_filenames, gt_labels, noise_labels, model_prob = data_process(noise_type, model_type=model_type)
+            prob_set.append(model_prob)
+        evaluate_dataset_noise(noise_type, data_filenames, gt_labels, noise_labels)
+        print('******' + 'Cross-validation for ' + str(
+            (prob_set[0].shape[0]) * 5) + ' epochs, evaluating every 10 epochs.' + '*******')
+        print('***************************************************************************')
+        for i in range(prob_set[0].shape[0]):
+            if (i + 1) % 5 == 0:
+            #if i < int(prob_set[0].shape[0] / 2):
+                tmp = []
+                print('******************************epoch ' + str(
+                    (i + 1)) + '***************************************')
+                noise_labels = [int(item) for item in noise_labels]
+                ordered_label_errors_set = []
+                for iii, item in enumerate(prob_set):
+                    if model_type_set[iii] == 'vanilla':
+                        ordered_label_errors_set.append(
+                            clb.pruning.get_noise_indices(s=noise_labels, psx=prob2psx(item[i]),
+                                                          prune_method='prune_by_noise_rate'))
+                    else:
+                        ordered_label_errors_set.append(
+                            clb.pruning.get_noise_indices(s=noise_labels, psx=prob2psx(np.mean(item[i], axis=1)),
+                                                          prune_method='prune_by_noise_rate'))
+                if 'random' in noise_type:
+                    acc_set = [evaluate_cleanlab(gt_labels, noise_labels, demo, clean_malware=False).astype(np.float64)
+                               for demo in
+                               ordered_label_errors_set]
+                    ending = ''
+                    for ii, acc in enumerate(acc_set):
+                        ending = ending + model_type_set[ii] + ' acc ' + str(round(acc * 100, 2)) + '%' + '  '
 
-    print('***************************************************************************')
-    for i in range(vanilla_prob.shape[0]):
-        if i%2==1:
-            print('******************************epoch ' + str(5 * (i + 1)) + '***************************************')
-            # print('vanilla acc', round(accuracy_score(gt_labels, (vanilla_prob[i] > 0.5).astype(int)), 6),
-            #       '  mcdropout acc',
-            #       round(accuracy_score(gt_labels, (np.mean(mcdropout_prob[i], axis=1) > 0.5).astype(int)), 6),
-            #       '  bayesian acc',
-            #       round(accuracy_score(gt_labels, (np.mean(bayesian_prob[i], axis=1) > 0.5).astype(int)), 6),
-            #       )
-            noise_labels = [int(item) for item in noise_labels]
-            vanilla_ordered_label_errors = clb.pruning.get_noise_indices(s=noise_labels,
-                                                                         psx=prob2psx(vanilla_prob[i]),
-                                                                         prune_method='prune_by_noise_rate')  # sorted_index_method='prob_given_label', verbose=1
-            mcdropout_ordered_label_errors = clb.pruning.get_noise_indices(s=noise_labels,
-                                                                           psx=prob2psx(np.mean(mcdropout_prob[i], axis=1)),
-                                                                           prune_method='prune_by_noise_rate')  # sorted_index_method='prob_given_label', verbose=1
-            bayesian_ordered_label_errors = clb.pruning.get_noise_indices(s=noise_labels,
-                                                                          psx=prob2psx(np.mean(bayesian_prob[i], axis=1)),
-                                                                          prune_method='prune_by_noise_rate')  # sorted_index_method='prob_given_label', verbose=1
-            deep_ordered_label_errors = clb.pruning.get_noise_indices(s=noise_labels,
-                                                                          psx=prob2psx(
-                                                                              np.mean(deep_prob[i], axis=1)),
-                                                                          prune_method='prune_by_noise_rate')  # sorted_index_method='prob_given_label', verbose=1
-            print('vanilla acc',
-                  evaluate_cleanlab(gt_labels, noise_labels, vanilla_ordered_label_errors),
-                  '  mcdropout acc',
-                  evaluate_cleanlab(gt_labels, noise_labels, mcdropout_ordered_label_errors),
-                  '  bayesian acc',
-                  evaluate_cleanlab(gt_labels, noise_labels, bayesian_ordered_label_errors),
-                  '  deepensemble acc',
-                  evaluate_cleanlab(gt_labels, noise_labels, deep_ordered_label_errors),
-                  )
-            # if noise_type != 'random':
-            #     print('vanilla acc',
-            #           evaluate_cleanlab(gt_labels, noise_labels, vanilla_ordered_label_errors, clean_malware=False),
-            #           '  mcdropout acc',
-            #           evaluate_cleanlab(gt_labels, noise_labels, mcdropout_ordered_label_errors, clean_malware=False),
-            #           '  bayesian acc',
-            #           evaluate_cleanlab(gt_labels, noise_labels, bayesian_ordered_label_errors, clean_malware=False),
-            #           )
+                else:
+                    acc_set = [evaluate_cleanlab(gt_labels, noise_labels, demo, clean_malware=True).astype(np.float64)
+                               for demo in
+                               ordered_label_errors_set]
+                    ending = ''
+                    for ii, acc in enumerate(acc_set):
+                        ending = ending + model_type_set[ii] + ' acc ' + str(round(acc * 100, 2)) + '%' + '  '
+                print(ending)
+                tmp.append(acc_set)
+                Tmp.append(tmp)
+            all.append(Tmp)
+        average_result = np.mean(all, axis=0)
+        print(all)
+    # np.save(data_type + '_' + Noise_type + '_' + feature_type + '_' + str(noise_hyper), np.array(all))
+    # print(average_result)
+
+    for jj, demo2 in enumerate(average_result):
+        Ending = ''
+        for iiii, demo3 in enumerate(demo2[0]):
+            Ending = Ending + model_type_set[iiii] + ' acc ' + str(round(demo3 * 100, 2)) + '%' + '  '
+        print(Ending)

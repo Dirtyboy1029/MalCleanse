@@ -136,7 +136,7 @@ class BayesianEnsemble(MCDropout):
             #             best_val_accuracy, epoch + 1, EPOCH
             #         )
             #         logger.info(msg)
-            if test_data is not None and training_predict is True and (epoch + 1) % 5 == 0:
+            if test_data is not None and training_predict is True: # and (epoch + 1) % 5 == 0
                 prob.append(self.predict_in_training(test_data))
             # prob_mean.append(self.predict_in_training(test_data, use_prob=True))
 

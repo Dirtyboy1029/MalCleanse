@@ -180,7 +180,7 @@ class WeightedDeepEnsemble(Vanilla):
                 epoch + 1, self.hparam.n_epochs, train_acc, val_acc
             )
             logger.info(msg)
-            if test_data is not None and training_predict is True and (epoch + 1) % 5 == 0:
+            if test_data is not None and training_predict is True: # and (epoch + 1) % 5 == 0
                 prob.append(self.predict_in_training(test_data, use_prob=False))
         training_log = []
         return prob, training_log

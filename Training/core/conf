@@ -1,8 +1,9 @@
 [DEFAULT]
-project_root = /home/lhd/Label_denoise_via_uncertainty/Training
+project_root = /home/lhd/MalCleanse/Training/
 
 
 [metadata]
+mwo_data_pool = /home/public/rmt/heren/experiment/cl-exp/LHD_apk/malwhiteout_naive_pool/
 naive_data_pool = /home/public/rmt/heren/experiment/cl-exp/LHD_apk/naive_pool
 
 
