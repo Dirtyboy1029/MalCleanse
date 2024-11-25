@@ -50,17 +50,17 @@ if __name__ == '__main__':
     for epoch in range(30):
         bay_prob = bayesian_prob[epoch]
         uc_entropy = np.array([predictive_entropy(prob_) for prob_ in bay_prob])
-        uc_1 = np.array([max_max2(prob_) for prob_ in bay_prob])
-        uc_2 = np.array([min2_min(prob_) for prob_ in bay_prob])
+        uc_kld = np.array([predictive_kld(prob_) for prob_ in bay_prob])
+        uc_std = np.array([predictive_std(prob_) for prob_ in bay_prob])
         uc_mean = np.array([np.mean(prob_) for prob_ in bay_prob])
         data.append(uc_entropy[noise_benign_index])
-        # data.append(uc_1[noise_benign_index])
-        # data.append(uc_2[noise_benign_index])
+        data.append(uc_kld[noise_benign_index])
+        data.append(uc_std[noise_benign_index])
         data.append(uc_mean[noise_benign_index])
 
     data = np.array(data).T
     print(data.shape)
-    bay_prob = np.mean(bayesian_prob[3], axis=1)
+    bay_prob = np.mean(bayesian_prob[29], axis=1)
     confident_joint = get_confident_joint_index(noise_labels, bay_prob)
     print(len(confident_joint[0]), len(confident_joint[2]))
     eva_noise_ratio = len(confident_joint[2]) / (len(confident_joint[2]) + len(confident_joint[0]))
