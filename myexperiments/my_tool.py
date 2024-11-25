@@ -9,8 +9,6 @@ from metrics_utils import *
 import argparse, os
 from sklearn.cluster import DBSCAN
 from sklearn.ensemble import IsolationForest
-from sklearn.svm import OneClassSVM
-from sklearn.neighbors import LocalOutlierFactor
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -28,8 +26,6 @@ if __name__ == '__main__':
         os.makedirs('my_tool_difference/dbscan/')
     if not os.path.isdir('my_tool_difference/isolation_forest/'):
         os.makedirs('my_tool_difference/isolation_forest/')
-    if not os.path.isdir('my_tool_difference/one_class_svm/'):
-        os.makedirs('my_tool_difference/one_class_svm/')
 
     print('-----------------------------------------------------------------------------------')
     print(
@@ -82,8 +78,4 @@ if __name__ == '__main__':
         dbscan.fit(X_diff_feature)
         outliers_dbscan = dbscan.labels_
         np.save('my_tool_difference/dbscan/' + noise_type, outliers_dbscan)
-    elif detection_model == 'svm':
-        clf = OneClassSVM(kernel=svm_kernel, nu=algorithm_hyper)
-        clf.fit(X_diff_feature)
-        outliers_svm = clf.predict(X_diff_feature)
-        np.save('my_tool_difference/one_class_svm/' + noise_type, outliers_svm)
+   
