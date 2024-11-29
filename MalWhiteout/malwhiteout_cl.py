@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     end = np.mean(main_(noise_type_source), axis=0)
     print(end)
-    MSG = "Noise Benign accurce is {:.2f}%."
+    MSG = "Before denoise Label Accurce is {:.2f}%."
     print(MSG.format(end[0] * 100))
 
     MSG = "Recall is {:.2f}%"
